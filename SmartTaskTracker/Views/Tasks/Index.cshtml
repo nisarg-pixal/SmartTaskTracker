@@ -1,0 +1,111 @@
+@model IEnumerable<SmartTaskTracker.Models.TaskItem>
+@{
+    ViewData["Title"] = "Tasks";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="m-0">Tasks</h2>
+    <button class="btn btn-primary" id="btnAdd"><i class="fa fa-plus"></i> New Task</button>
+  </div>
+
+<div class="mb-3">
+  <div class="btn-group" role="group" aria-label="Filters">
+    <button class="btn btn-outline-secondary" data-filter="all">All</button>
+    <button class="btn btn-outline-secondary" data-filter="completed">Completed</button>
+    <button class="btn btn-outline-secondary" data-filter="pending">Pending</button>
+    <button class="btn btn-outline-secondary" data-filter="today">Today</button>
+  </div>
+  <span class="small text-secondary ms-2">Click a filter to view.</span>
+  </div>
+
+<div id="tasksTable">
+    @await Html.PartialAsync("_TasksTable", Model)
+  </div>
+
+<div class="modal fade" id="taskModal" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Task</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" id="taskModalBody">
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="confirmModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Confirm</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" id="confirmModalBody"></div>
+    </div>
+  </div>
+</div>
+
+@section Scripts {
+<script>
+  (function(){
+    const table = document.getElementById('tasksTable');
+    const taskModal = new bootstrap.Modal(document.getElementById('taskModal'));
+    const confirmModal = new bootstrap.Modal(document.getElementById('confirmModal'));
+    const taskModalBody = document.getElementById('taskModalBody');
+    const confirmModalBody = document.getElementById('confirmModalBody');
+
+    let currentFilter = 'all';
+    function reloadTable(){
+      const url = '/Tasks/ListPartial' + (currentFilter && currentFilter !== 'all' ? ('?filter=' + currentFilter) : '');
+      fetch(url).then(r=>r.text()).then(html=>{ table.innerHTML = html; });
+    }
+
+    function wireForm(el){
+      const form = el.querySelector('form');
+      if (!form) return;
+      form.addEventListener('submit', function(e){
+        e.preventDefault();
+        fetch(form.action, { method:'POST', body: new FormData(form) })
+          .then(r=>r.text()).then(html=>{ table.innerHTML = html; taskModal.hide(); });
+      });
+    }
+
+    document.getElementById('btnAdd').addEventListener('click', function(){
+      fetch('/Tasks/Create').then(r=>r.text()).then(html=>{ taskModalBody.innerHTML = html; taskModal.show(); wireForm(taskModalBody); });
+    });
+
+    document.querySelectorAll('[data-filter]').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        document.querySelectorAll('[data-filter]').forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active');
+        currentFilter = btn.getAttribute('data-filter');
+        reloadTable();
+      });
+    });
+
+    table.addEventListener('click', function(e){
+      const btn = e.target.closest('button');
+      if (!btn) return;
+      const id = btn.getAttribute('data-id');
+      const action = btn.getAttribute('data-action');
+      if (action === 'edit'){
+        fetch('/Tasks/Edit/' + id).then(r=>r.text()).then(html=>{ taskModalBody.innerHTML = html; taskModal.show(); wireForm(taskModalBody); });
+      } else if (action === 'delete'){
+        fetch('/Tasks/Delete/' + id).then(r=>r.text()).then(html=>{ confirmModalBody.innerHTML = html; confirmModal.show(); const form = confirmModalBody.querySelector('form'); form.addEventListener('submit', function(ev){ ev.preventDefault(); fetch(form.action, { method:'POST', body: new FormData(form) }).then(r=>r.text()).then(html=>{ table.innerHTML = html; confirmModal.hide(); }); }); });
+      } else if (action === 'start' || action === 'stop'){
+        fetch('/Tasks/' + (action === 'start' ? 'StartTimer/' : 'StopTimer/') + id, { method:'POST', headers: { 'RequestVerificationToken': getAntiForgeryToken() }})
+          .then(r=>r.text()).then(html=>{ table.innerHTML = html; });
+      }
+    });
+
+    function getAntiForgeryToken(){
+      const tokenField = document.querySelector('input[name=__RequestVerificationToken]');
+      return tokenField ? tokenField.value : '';
+    }
+  })();
+</script>
+}
+
+

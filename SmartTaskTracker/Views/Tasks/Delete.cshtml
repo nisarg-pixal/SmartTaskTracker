@@ -1,0 +1,19 @@
+@model SmartTaskTracker.Models.TaskItem
+@{
+    ViewData["Title"] = "Delete Task";
+}
+
+<div class="card shadow-sm">
+  <div class="card-header">Delete Task</div>
+  <div class="card-body">
+    <p>Are you sure you want to delete <strong>@Model.Title</strong>?</p>
+    <form asp-action="Delete" method="post">
+      @Html.AntiForgeryToken()
+      <input type="hidden" asp-for="Id" />
+      <button type="submit" class="btn btn-danger"><i class="fa fa-trash"></i> Delete</button>
+      <a href="/Tasks" class="btn btn-outline-secondary">Cancel</a>
+    </form>
+  </div>
+</div>
+
+

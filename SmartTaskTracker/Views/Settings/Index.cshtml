@@ -1,0 +1,35 @@
+@{
+    ViewData["Title"] = "Settings";
+}
+
+<div class="card shadow-sm">
+    <div class="card-header">Settings</div>
+    <div class="card-body">
+        @if (TempData["ResetMessage"] != null)
+        {
+            <div class="alert alert-success">@TempData["ResetMessage"]</div>
+        }
+        <div class="mb-3">
+            <h6>Theme</h6>
+            <p class="text-secondary">Use the moon/sun button in the sidebar to toggle dark/light mode. Your preference is saved locally.</p>
+        </div>
+        <div class="mb-3">
+            <h6>Data</h6>
+            <form method="post" asp-action="Reset">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn btn-outline-danger"><i class="fa fa-rotate"></i> Reset All Tasks</button>
+            </form>
+        </div>
+        <div class="mb-1">
+            <h6>App Info</h6>
+            <ul class="list-unstyled small text-secondary">
+                <li>App: SmartTaskTracker</li>
+                <li>Version: 1.0.0</li>
+                <li>Developer: Your Name</li>
+            </ul>
+        </div>
+        <a class="btn btn-outline-primary" href="/">Back to Dashboard</a>
+    </div>
+  </div>
+
+

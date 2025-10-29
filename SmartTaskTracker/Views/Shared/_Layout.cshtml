@@ -1,0 +1,56 @@
+@{
+    var appTitle = "SmartTaskTracker";
+    string currentPath = Context.Request.Path.Value?.ToLower() ?? "/";
+    Func<string, string> isActive = (p) => currentPath.StartsWith(p) ? "active" : string.Empty;
+}
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@appTitle - @ViewData["Title"]</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="~/css/site.css" />
+</head>
+<body>
+    <div class="d-flex">
+        <aside class="stt-sidebar d-flex flex-column p-3">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <a class="navbar-brand fw-semibold text-white text-decoration-none" href="/">@appTitle</a>
+                <button id="themeToggle" class="btn btn-sm btn-outline-light" title="Toggle theme">
+                    <i class="fa-solid fa-moon"></i>
+                </button>
+            </div>
+            <ul class="nav nav-pills flex-column mb-auto">
+                <li class="nav-item"><a class="nav-link @isActive("/")" href="/"><i class="fa-solid fa-house me-2"></i>Dashboard</a></li>
+                <li class="nav-item"><a class="nav-link @isActive("/tasks")" href="/Tasks"><i class="fa-solid fa-square-check me-2"></i>Tasks</a></li>
+                <li class="nav-item"><a class="nav-link @isActive("/analytics")" href="/Analytics"><i class="fa-solid fa-chart-line me-2"></i>Analytics</a></li>
+                <li class="nav-item"><a class="nav-link @isActive("/settings")" href="/Settings"><i class="fa-solid fa-gear me-2"></i>Settings</a></li>
+            </ul>
+            <div class="mt-auto small text-white-50">&copy; @DateTime.Now.Year</div>
+        </aside>
+        <div class="stt-main flex-grow-1">
+            <div class="stt-header text-white">
+                <div class="container-fluid py-3 d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="fw-semibold">@ViewData["Title"]</div>
+                        <div class="small opacity-75">Smart personal productivity tracker</div>
+                    </div>
+                    <div id="sttClock" class="fw-semibold"></div>
+                </div>
+            </div>
+            <main class="container-fluid stt-content py-4">
+                @RenderBody()
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+    <script src="~/js/site.js"></script>
+    @RenderSection("Scripts", required: false)
+</body>
+</html>
+
+

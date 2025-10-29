@@ -1,0 +1,95 @@
+@{
+    ViewData["Title"] = "Analytics";
+    var productivity = (int)(ViewBag.Productivity ?? 0);
+    string[] labels = (string[])(ViewBag.WeeklyLabels ?? Array.Empty<string>());
+    int[] counts = (int[])(ViewBag.WeeklyCounts ?? Array.Empty<int>());
+    int[] statusCounts = (int[])(ViewBag.StatusCounts ?? Array.Empty<int>());
+}
+
+<div class="row g-3">
+    <div class="col-12">
+        <div class="card shadow-sm">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>Weekly Completions</span>
+                <div class="d-flex align-items-center gap-2">
+                    <a class="btn btn-sm btn-outline-secondary" target="_blank" href="/Analytics/Report"><i class="fa fa-file-pdf"></i> Export PDF</a>
+                    <span class="text-secondary small">Last 7 days</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <canvas id="weeklyChart" height="140"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-lg-6">
+        <div class="card shadow-sm">
+            <div class="card-header">Status Distribution</div>
+            <div class="card-body">
+                <canvas id="statusChart" height="160"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-lg-6">
+        <div class="card shadow-sm">
+            <div class="card-header">Productivity Score</div>
+            <div class="card-body">
+                <div class="progress rounded-pill">
+                    <div class="progress-bar" role="progressbar" style="width:@productivity%">@productivity%</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-lg-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-header">Smart Insights</div>
+            <div class="card-body">
+                <p class="mb-1"><i class="fa fa-lightbulb text-warning"></i> Your most productive day: <strong>@(ViewBag.InsightTopDay ?? "N/A")</strong></p>
+                <p class="mb-1"><i class="fa fa-clock text-primary"></i> @(ViewBag.InsightTip ?? "Keep up the momentum!")</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    (function(){
+        var ctx = document.getElementById('weeklyChart');
+        if (!ctx) return;
+        var labels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(labels));
+        var data = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(counts));
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Completed',
+                    data: data,
+                    borderColor: 'rgba(0,123,255,0.9)',
+                    backgroundColor: 'rgba(0,180,216,0.25)',
+                    tension: .35,
+                    fill: true
+                }]
+            },
+            options: { responsive: true, scales: { y: { beginAtZero: true, precision: 0 } } }
+        });
+        var sc = document.getElementById('statusChart');
+        if (sc){
+            var sdata = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(statusCounts));
+            new Chart(sc, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Pending','In Progress','Completed'],
+                    datasets: [{
+                        data: sdata,
+                        backgroundColor: ['#fd7e14','#0d6efd','#198754'],
+                        hoverBackgroundColor: ['#ffa054','#3d8bfd','#22a06b']
+                    }]
+                },
+                options: { responsive: true, cutout: '60%' }
+            });
+        }
+    })();
+</script>
+}
+
+

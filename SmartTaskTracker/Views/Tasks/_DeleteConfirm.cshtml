@@ -1,0 +1,11 @@
+@model SmartTaskTracker.Models.TaskItem
+<form id="deleteForm" method="post" action="@Url.Action("DeleteConfirmed","Tasks", new { id = Model.Id })">
+  @Html.AntiForgeryToken()
+  <p>Delete <strong>@Model.Title</strong>?</p>
+  <div class="d-flex gap-2">
+    <button type="submit" class="btn btn-danger"><i class="fa fa-trash"></i> Delete</button>
+    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+  </div>
+</form>
+
+

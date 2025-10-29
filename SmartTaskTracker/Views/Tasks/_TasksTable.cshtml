@@ -1,0 +1,67 @@
+@model IEnumerable<SmartTaskTracker.Models.TaskItem>
+<div class="table-responsive">
+    <table class="table align-middle">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Status</th>
+                <th>Start</th>
+                <th>End</th>
+                <th>Category</th>
+                <th>Deadline</th>
+                <th class="text-end">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var t in Model)
+        {
+            <tr>
+                <td>
+                    <div class="fw-semibold">@t.Title</div>
+                    @if (!string.IsNullOrWhiteSpace(t.Description))
+                    {
+                        <div class="text-secondary small">@t.Description</div>
+                    }
+                </td>
+                <td>
+                    <span class="badge text-bg-@GetStatusClass(t.Status)">@t.Status</span>
+                </td>
+                <td>@(t.StartTime?.ToString("g") ?? "-")</td>
+                <td>@(t.EndTime?.ToString("g") ?? "-")</td>
+                <td>@(t.Category ?? "-")</td>
+                <td>@(t.Deadline?.ToString("d") ?? "-")</td>
+                <td class="text-end">
+                    <div class="btn-group">
+                        <button class="btn btn-sm btn-outline-secondary" data-action="edit" data-id="@t.Id"><i class="fa fa-pen"></i></button>
+                        <button class="btn btn-sm btn-outline-danger" data-action="delete" data-id="@t.Id"><i class="fa fa-trash"></i></button>
+                    </div>
+                    <div class="d-inline-block ms-2">
+                        @if (!t.IsTimerRunning)
+                        {
+                            <button class="btn btn-sm btn-outline-success" data-action="start" data-id="@t.Id"><i class="fa fa-play"></i></button>
+                        }
+                        else
+                        {
+                            <button class="btn btn-sm btn-outline-warning" data-action="stop" data-id="@t.Id"><i class="fa fa-stop"></i></button>
+                        }
+                    </div>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>
+
+@functions {
+    string GetStatusClass(SmartTaskTracker.Models.TaskStatus status)
+    {
+        return status switch
+        {
+            SmartTaskTracker.Models.TaskStatus.Completed => "success",
+            SmartTaskTracker.Models.TaskStatus.InProgress => "primary",
+            _ => "warning"
+        };
+    }
+}
+
+
